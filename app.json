@@ -1,7 +1,15 @@
 {
   "expo": {
-    "name": "testApp",
-    "slug": "testApp",
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ]
+    ],
+    "name": "KamiSpaApp",
+    "slug": "KamiSpaApp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
