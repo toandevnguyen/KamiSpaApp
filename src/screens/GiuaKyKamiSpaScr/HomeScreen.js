@@ -1,14 +1,14 @@
 import React from 'react';
-import { FlatList, ScrollView, Text, View, StyleSheet } from 'react-native';
+import { FlatList, ScrollView, Text, View, StyleSheet, StatusBar } from 'react-native';
 import { Appbar, TextInput, Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// import Todo from '../../components/TodosAppCpn/Todo';
+import useAuth from '../../hooks/useAuth'; //hook onAuthStateChanged
+
 import RNE_SpeedDialCPN from '../../components/KamiSpaAppCpn/RNE_SpeedDialCPN';
 import ServiceItemList from '../../components/KamiSpaAppCpn/ServiceItemList';
 import { firebase, FIRE_BASE_AUTH } from '../../firebase/firebaseConfig';
 
-const userProfile = FIRE_BASE_AUTH;
 const today = new Date();
 const day = today.getDate().toString().padStart(2, '0');
 const month = today.getMonth() + 1;
@@ -17,7 +17,17 @@ const hour = today.getHours().toString().padStart(2, '0');
 const minute = today.getMinutes().toString().padStart(2, '0');
 const second = today.getSeconds().toString().padStart(2, '0');
 
-function HomeScreen() {
+export default function HomeScreen() {
+  const userProfile = useAuth()?.user?.email;
+
+  // const refUsers = firebase.firestore().collection('KamiSpaApp-Users').doc(userProfile); //create a reference to the collection, which can be used throughout our component to query it.
+
+  const refServicesDetail = firebase.firestore().collection('KamiSpaApp-ServicesDetail'); //create a reference to the collection, which can be used throughout our component to query it.
+  const [txtInputServiceName, setTxtInputServiceName] = React.useState(''); //use the useState hook here, and update state every time the text changes via the onChangeText prop from the TextInput component.
+
+  const [loading, setLoading] = React.useState(true); //We need a loading state to indicate to the user that the first connection (and initial data read) to Cloud Firestore has not yet completed.
+  const [services, setServices] = React.useState([]); //manng luu nhieu cong viec
+
   //TODO:chức năng Search
   const [searchResults, setSearchResults] = React.useState([]);
   const searchService = (query) => {
@@ -27,27 +37,21 @@ function HomeScreen() {
     setSearchResults(results);
   };
 
-  const [txtInputServiceName, setTxtInputServiceName] = React.useState(''); //use the useState hook here, and update state every time the text changes via the onChangeText prop from the TextInput component.
 
-  const ref = firebase.firestore().collection('KamiSpa-db'); //create a reference to the collection, which can be used throughout our component to query it.
-
-  const [loading, setLoading] = React.useState(true); //We need a loading state to indicate to the user that the first connection (and initial data read) to Cloud Firestore has not yet completed.
-  const [services, setServices] = React.useState([]); //manng luu nhieu cong viec
-  // const [open, setOpen] = React.useState(false);
-  // ...
   //Đây là một hook trong React, cho phép bạn thực hiện các hiệu ứng phụ sau khi render.
   React.useEffect(() => {
     //Đây là hàm callback được gọi sau khi component render. Nó sẽ thiết lập một lắng nghe sự kiện từ Firestore.
     //Sử dụng phương thức onSnapshot của Firestore để lắng nghe thay đổi dữ liệu (thêm, xóa, cập nhật).
     //ref.onSnapshot((querySnapshot) => { ... }): Phương thức onSnapshot của Firestore cho phép bạn lắng nghe sự thay đổi dữ liệu từ Firestore. Khi có sự thay đổi, nó sẽ gọi hàm callback với querySnapshot là đối tượng chứa dữ liệu mới.
-    return ref.onSnapshot((querySnapshot) => {
+    return refServicesDetail.onSnapshot((querySnapshot) => {
       const list = [];
       querySnapshot.forEach((doc) => {
-        const { ServiceName, price, Creator, Time, FinalUpdate } = doc.data();
+        const { ServiceName, price, image, Creator, Time, FinalUpdate } = doc.data();
         list.push({
           id: doc.id,
           ServiceName,
           price,
+          image,
           Creator,
           Time,
           FinalUpdate,
@@ -64,50 +68,51 @@ function HomeScreen() {
 
   // ...
 
-  // Create a new function in our component called addTodo. This method will use our existing ref variable to add a new item to the Firestore database.
-  async function addService() {
-    // Kiểm tra xem ServiceName có tồn tại trong Firestore hay không
-    const serviceExists = await firebase
-      .firestore()
-      .collection('KamiSpa-db')
-      .where('ServiceName', '==', txtInputServiceName)
-      .get();
+  //TODO: fix giỏ hàng
+  // async function addService() {
+  //   // Kiểm tra xem ServiceName có tồn tại trong Firestore hay không
+  //   const serviceExists = await firebase
+  //     .firestore()
+  //     .collection('KamiSpa-db')
+  //     .where('ServiceName', '==', txtInputServiceName)
+  //     .get();
 
-    // Nếu ServiceName đã tồn tại, thông báo cho người dùng và không thêm mới
-    if (!serviceExists.empty || !txtInputServiceName.trim()) {
-      alert('Chưa nhập ServiceName hoặc ServiceName đã tồn tại!');
-      return;
-    }
-    await ref.add({
-      ServiceName: txtInputServiceName,
-      price: 1,
-      Creator: 'Admin Toan',
-      Time: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
-      FinalUpdate: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
-    });
+  //   // Nếu ServiceName đã tồn tại, thông báo cho người dùng và không thêm mới
+  //   if (!serviceExists.empty || !txtInputServiceName.trim()) {
+  //     alert('Chưa nhập ServiceName hoặc ServiceName đã tồn tại!');
+  //     return;
+  //   }
+  //   await ref.add({
+  //     ServiceName: txtInputServiceName,
+  //     price: 1,
+  //     Creator: 'Admin Toan',
+  //     Time: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
+  //     FinalUpdate: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
+  //   });
 
-    // Đặt giá trị của biến todo thành chuỗi rỗng.
-    setTxtInputServiceName('');
-  }
+  //   // Đặt giá trị của biến todo thành chuỗi rỗng.
+  //   setTxtInputServiceName('');
+  // }
 
-  if (loading) {
-    return null; // or a spinner
-  }
+  // if (loading) {
+  //   return null; // or a spinner
+  // }
 
   return (
     <View style={styles.container}>
+      <StatusBar />
       <Appbar style={{ width: '100%', backgroundColor: 'rgb(239, 80, 107)' }}>
-        <Appbar.Content title={userProfile?.currentUser?.displayName} color="rgb(255, 255, 255)" />
+        <Appbar.Content title={userProfile} color="rgb(255, 255, 255)" />
       </Appbar>
       <Text style={styles.txtHeader}>KAMI SPA</Text>
       <View style={styles.groupTxtTitle}>
         <Text style={styles.txtTitle}>Danh sách dịch vụ</Text>
         <Icon.Button
-          name="plus-circle"
+          name="cart-arrow-right"
           color="rgb(239, 80, 107)"
           backgroundColor="#ffffff00"
           size={24}
-          onPress={addService}
+          // onPress={addService}
         />
       </View>
 
@@ -138,7 +143,8 @@ function HomeScreen() {
           searchService(query);
         }}
       />
-      <RNE_SpeedDialCPN />
+      {userProfile === 'admin1@gmail.com' ? <RNE_SpeedDialCPN /> : null}
+      {/* {getInfoUserLogin() == true ? <RNE_SpeedDialCPN /> : null} */}
     </View>
   );
 }
@@ -198,4 +204,3 @@ const styles = StyleSheet.create({
     // borderColor: 'rgb(0, 0, 0)',
   },
 });
-export default HomeScreen;

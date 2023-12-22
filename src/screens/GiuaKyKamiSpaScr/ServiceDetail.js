@@ -1,15 +1,18 @@
 import React from 'react';
-import { FlatList, ScrollView, Text, View, StyleSheet } from 'react-native';
+import { FlatList, ScrollView, Text, View, StyleSheet, StatusBar } from 'react-native';
 import { Appbar, TextInput, Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 // import Todo from '../../components/TodosAppCpn/Todo';
 import ServiceItemDetail from '../../components/KamiSpaAppCpn/ServiceItemDetail';
 import { firebase, FIRE_BASE_AUTH } from '../../firebase/firebaseConfig';
-const userProfile = FIRE_BASE_AUTH;
+import useAuth from '../../hooks/useAuth';
+// const userProfile = FIRE_BASE_AUTH;
 
 function ServiceDetail() {
-  const ref = firebase.firestore().collection('KamiSpa-db'); //create a reference to the collection, which can be used throughout our component to query it.
+  const userProfile = useAuth();
+
+  const ref = firebase.firestore().collection('KamiSpaApp-ServicesDetail'); //create a reference to the collection, which can be used throughout our component to query it.
 
   const [loading, setLoading] = React.useState(true); //We need a loading state to indicate to the user that the first connection (and initial data read) to Cloud Firestore has not yet completed.
   const [service, setService] = React.useState([]); //manng luu nhieu cong viec
@@ -23,10 +26,11 @@ function ServiceDetail() {
     return ref.onSnapshot((querySnapshot) => {
       const list = [];
       querySnapshot.forEach((doc) => {
-        const { ServiceName, price, Creator, Time, FinalUpdate } = doc.data();
+        const { ServiceName, price, Creator, Time, FinalUpdate, image } = doc.data();
         list.push({
           id: doc.id,
           ServiceName,
+          image,
           price,
           Creator,
           Time,
@@ -46,8 +50,11 @@ function ServiceDetail() {
 
   return (
     <View style={styles.container}>
+      <StatusBar />
+
       <Appbar style={{ width: '100%', backgroundColor: 'rgb(239, 80, 107)' }}>
-        <Appbar.Content title={userProfile?.currentUser?.displayName} color="rgb(255, 255, 255)" />
+        <Appbar.Content title={userProfile?.user?.email} color="rgb(255, 255, 255)" />
+        {/* <Appbar.Content title={userProfile?.currentUser?.displayName} color="rgb(255, 255, 255)" /> */}
       </Appbar>
       <Text style={styles.txtHeader}>Chi tiết danh sách dịch vụ</Text>
 

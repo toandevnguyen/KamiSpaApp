@@ -11,8 +11,9 @@ const year = today.getFullYear();
 const hour = today.getHours().toString().padStart(2, '0');
 const minute = today.getMinutes().toString().padStart(2, '0');
 const second = today.getSeconds().toString().padStart(2, '0');
-const UpdateServiceCPN = ({ item }) => {
-  const ref = firebase.firestore().collection('KamiSpa-db'); //create a reference to the collection, which can be used throughout our component to query it.
+
+export default function UpdateServiceCPN({item}) {
+  const refServicesDetail = firebase.firestore().collection('KamiSpaApp-ServicesDetail'); //create a reference to the collection, which can be used throughout our component to query it.
 
   const [loadingBtn, setLoadingBtn] = useState(false);
   const { id, ServiceName, price, Creator, Time, FinalUpdate } = item;
@@ -24,7 +25,7 @@ const UpdateServiceCPN = ({ item }) => {
     // Kiểm tra xem ServiceName có tồn tại trong Firestore hay không
     const serviceExists = await firebase
       .firestore()
-      .collection('KamiSpa-db')
+      .collection('KamiSpaApp-ServicesDetail')
       .where('ServiceName', '==', txtInputServiceName)
       .get();
 
@@ -39,7 +40,7 @@ const UpdateServiceCPN = ({ item }) => {
       return;
     }
 
-    await ref
+    await refServicesDetail
       .doc(id)
       .update({
         ServiceName: txtInputServiceName,
@@ -86,6 +87,7 @@ const UpdateServiceCPN = ({ item }) => {
         value={txtInputPrice}
         onChangeText={setTxtInputPrice}
       />
+
       <Button
         style={styles.btnAddService}
         mode="contained"
@@ -110,7 +112,7 @@ const UpdateServiceCPN = ({ item }) => {
       </Button>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   textPrimary: {
@@ -141,5 +143,3 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
 });
-
-export default UpdateServiceCPN;

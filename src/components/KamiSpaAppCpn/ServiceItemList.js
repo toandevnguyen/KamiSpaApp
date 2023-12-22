@@ -1,6 +1,6 @@
 import { ListItem, Overlay } from '@rneui/themed';
 import React from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 import { Button, Dialog, Portal } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -10,11 +10,11 @@ import { firebase } from '../../firebase/firebaseConfig';
 
 function ServiceItemList({ item }) {
   const [onPressItem, setOnPressItem] = React.useState(false);
-  const ref = firebase.firestore().collection('KamiSpa-db'); //create a reference to the collection, which can be used throughout our component to query it.
+  const ref = firebase.firestore().collection('KamiSpaApp-ServicesDetail'); //create a reference to the collection, which can be used throughout our component to query it.
   const [overlayVisibleInfo, setOverlayVisibleInfo] = React.useState(false);
   const [overlayVisibleEdit, setOverlayVisibleEdit] = React.useState(false);
 
-  const { id, ServiceName, price, Creator, Time, FinalUpdate } = item;
+  const { id, ServiceName, price, image, Creator, Time, FinalUpdate } = item;
   // async function toggleComplete() {
   //   await firebaseStore.firestore().collection('KamiSpa-db').doc(id).update({
   //     // complete: !complete,
@@ -23,8 +23,12 @@ function ServiceItemList({ item }) {
   function ShowInfoService() {
     return (
       <View>
+        <Text>ID: {id} </Text>
         <Text>ServiceName: {ServiceName} </Text>
         <Text>price: {price} </Text>
+        {image && (
+          <Image source={{ uri: image }} style={{ width: 200, height: 200, alignSelf: 'center' }} />
+        )}
         <Text>Creator: {Creator} </Text>
         <Text>Time: {Time} </Text>
         <Text>Final Update: {FinalUpdate} </Text>
@@ -47,7 +51,7 @@ function ServiceItemList({ item }) {
   return (
     <View style={styles.contactInfo}>
       <ListItem.Swipeable
-        // onPress={() => setOverlayVisible(!overlayVisible)}
+        onPress={() => setOverlayVisibleInfo(!overlayVisibleInfo)}
         leftWidth={60}
         bottomDivider
         leftContent={
@@ -141,6 +145,12 @@ function ServiceItemList({ item }) {
             // backgroundColor: 'rgb(199, 55, 55)',
           }}>
           <ListItem.Title>{ServiceName}</ListItem.Title>
+          {/* {image && (
+            <Image
+              source={{ uri: image }}
+              style={{ width: 20, height: 20, alignSelf: 'center' }}
+            />
+          )} */}
           <ListItem.Title>{price}</ListItem.Title>
         </ListItem.Content>
         {/* <ListItem.Chevron /> */}

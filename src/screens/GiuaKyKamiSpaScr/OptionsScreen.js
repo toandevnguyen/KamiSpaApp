@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { deleteUser, signOut } from 'firebase/auth';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, StatusBar } from 'react-native';
 // import * as WebBrowser from 'expo-web-browser';
 import { Appbar } from 'react-native-paper';
 
@@ -8,10 +8,11 @@ import DetailListItem from '../../components/KamiSpaAppCpn/DetailListItem';
 import { FIRE_BASE_AUTH } from '../../firebase/firebaseConfig';
 import useAuth from '../../hooks/useAuth'; //hook onAuthStateChanged
 // WebBrowser.maybeCompleteAuthSession();
-const userProfile = FIRE_BASE_AUTH;
+// const userProfile = FIRE_BASE_AUTH;
 export default function OptionsScreen({ navigation }) {
   const userLoginEmail = useAuth();
   console.log('🚀 ~ file: OptionsScreen.js:13 ~ OptionsScreen ~ userLoginEmail:', userLoginEmail);
+
   const handleRemoveAcc = async () => {
     try {
       // Lấy người dùng hiện tại
@@ -34,10 +35,27 @@ export default function OptionsScreen({ navigation }) {
     }
   };
 
+  async function handleSignOut() {
+    if (userLoginEmail?.user) {
+      try {
+        await AsyncStorage.removeItem('@user');
+        // await AsyncStorage.clear;
+        await signOut(FIRE_BASE_AUTH);
+        // console.log('after signOut userLoginEmail:', FIRE_BASE_AUTH),
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    else alert('Không có người dùng đăng nhập!')
+  }
+
   return (
     <View style={styles.container}>
+      <StatusBar />
       <Appbar style={{ width: '100%', backgroundColor: 'rgb(239, 80, 107)' }}>
-        <Appbar.Content title={userProfile?.currentUser?.displayName} color="rgb(255, 255, 255)" />
+        <Appbar.Content title={userLoginEmail?.user?.email} color="rgb(255, 255, 255)" />
+
+        {/* <Appbar.Content title={userProfile?.currentUser?.email} color="rgb(255, 255, 255)" /> */}
       </Appbar>
       <DetailListItem title="Update Profile" />
       <DetailListItem title="Change Language" />
@@ -45,15 +63,9 @@ export default function OptionsScreen({ navigation }) {
       <TouchableOpacity onPress={handleRemoveAcc}>
         <DetailListItem title="Remove Account" />
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={async () => {
-          await AsyncStorage.removeItem('@user');
-          // await AsyncStorage.clear;
-          await signOut(FIRE_BASE_AUTH);
-          console.log('after signOut userLoginEmail:', FIRE_BASE_AUTH);
 
-          // navigation.navigate('HomeScreen');
-        }}>
+      <TouchableOpacity
+        onPress={handleSignOut}>
         <DetailListItem title="Sign Out" />
       </TouchableOpacity>
     </View>

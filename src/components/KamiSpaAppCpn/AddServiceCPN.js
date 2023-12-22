@@ -20,7 +20,11 @@ const second = today.getSeconds().toString().padStart(2, '0');
 const AddServiceCPN = () => {
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [loadingBtn, setLoadingBtn] = useState(false);
+  const [txtInputServiceName, setTxtInputServiceName] = useState('');
+  const [txtInputPrice, setTxtInputPrice] = useState('');
   // No permissions request is necessary for launching the image library
+  //Chọn ảnh trong điện thoại
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -35,8 +39,34 @@ const AddServiceCPN = () => {
       setImage(result.assets[0].uri);
     }
   };
-  //Upload media files
-  const uploadMedia = async () => {
+
+  async function AddService() {
+    // Kiểm tra xem ServiceName có tồn tại trong Firestore hay không
+    const serviceExists = await firebase
+      .firestore()
+      .collection('KamiSpa-db')
+      .where('ServiceName', '==', txtInputServiceName)
+      .get();
+
+    // Nếu ServiceName đã tồn tại, thông báo cho người dùng và không thêm mới
+    if (!serviceExists.empty || !txtInputServiceName.trim()) {
+      alert('Chưa nhập ServiceName hoặc ServiceName đã tồn tại!');
+      setLoadingBtn(false);
+      return;
+    }
+    
+    const ref = firebase.firestore().collection('KamiSpaApp-ServicesDetail'); //create a reference to the collection, which can be used throughout our component to query it.
+    await ref.add({
+      ServiceName: txtInputServiceName,
+      price: txtInputPrice,
+      image: image,
+      Creator: 'Admin Toan',
+      Time: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
+      FinalUpdate: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
+    });
+
+    //Upload media files
+
     setUploading(true);
     try {
       const { uri } = await FileSystem.getInfoAsync(image);
@@ -63,36 +93,6 @@ const AddServiceCPN = () => {
       console.error(error);
       setUploading(false);
     }
-  };
-
-  const ref = firebase.firestore().collection('KamiSpa-db'); //create a reference to the collection, which can be used throughout our component to query it.
-
-  const [loadingBtn, setLoadingBtn] = useState(false);
-  const [txtInputServiceName, setTxtInputServiceName] = useState('');
-  const [txtInputPrice, setTxtInputPrice] = useState('');
-
-  async function AddService() {
-    // Kiểm tra xem ServiceName có tồn tại trong Firestore hay không
-    const serviceExists = await firebase
-      .firestore()
-      .collection('KamiSpa-db')
-      .where('ServiceName', '==', txtInputServiceName)
-      .get();
-
-    // Nếu ServiceName đã tồn tại, thông báo cho người dùng và không thêm mới
-    if (!serviceExists.empty || !txtInputServiceName.trim()) {
-      alert('Chưa nhập ServiceName hoặc ServiceName đã tồn tại!');
-      setLoadingBtn(false);
-      return;
-    }
-    await ref.add({
-      ServiceName: txtInputServiceName,
-      price: txtInputPrice,
-      Creator: 'Admin Toan',
-      Time: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
-      FinalUpdate: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
-    });
-
     // Đặt giá trị của biến todo thành chuỗi rỗng.
     setTxtInputServiceName('');
     setTxtInputPrice('');
@@ -128,7 +128,7 @@ const AddServiceCPN = () => {
         mode="contained"
         labelStyle={{ fontSize: 19 }} // Define font size here
         textColor="rgb(255, 255, 255)"
-        loading={!!loadingBtn}
+        // loading={!!loadingBtn}
         // icon="playlist-plus"
         icon={({ size, color }) => (
           <Icon
@@ -138,7 +138,7 @@ const AddServiceCPN = () => {
           />
         )}
         onPress={() => {
-          setLoadingBtn(!loadingBtn);
+          // setLoadingBtn(!loadingBtn);
           pickImage();
         }}
         // onPress={addService}
@@ -164,8 +164,8 @@ const AddServiceCPN = () => {
         )}
         onPress={() => {
           setLoadingBtn(!loadingBtn);
-          // AddService();
-          uploadMedia();
+          AddService();
+          // uploadMedia();
         }}
         // onPress={addService}
       >

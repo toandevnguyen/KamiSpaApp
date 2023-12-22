@@ -1,41 +1,51 @@
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, Image } from 'react-native';
 import { List } from 'react-native-paper';
 
 import { firebase } from '../../firebase/firebaseConfig';
 
-function ServiceItemListDetail({ id, ServiceName, price, Creator, Time, FinalUpdate }) {
+function ServiceItemListDetail({ id, ServiceName, price, Creator, Time, FinalUpdate, image }) {
   const [onPressItem, setOnPressItem] = React.useState(false);
 
   return (
-    <View style={styles.contactInfo}>
-      <Text>ServiceName: {ServiceName} </Text>
-      <Text>price: {price} </Text>
-      <Text>Creator: {Creator} </Text>
-      <Text>Time: {Time} </Text>
-      <Text>Final Update: {FinalUpdate} </Text>
+    <View style={styles.container}>
+      <View style={styles.contactInfo}>
+        <View style={styles.txtInfoService}>
+          <Text>ServiceName: {ServiceName} </Text>
+          <Text>price: {price} </Text>
+          <Text>Creator: {Creator} </Text>
+          <Text>Time: {Time} </Text>
+          <Text>Final Update: {FinalUpdate} </Text>
+        </View>
+        {image && (
+          <Image
+            source={{ uri: image }}
+            style={{
+              width: 100,
+              height: 100,
+              alignSelf: 'center',
+              // backgroundColor: 'rgb(249, 94, 94)',
+            }}
+          />
+        )}
+      </View>
     </View>
   );
 }
 const styles = StyleSheet.create({
   container: {
-    paddingLeft: 24,
+    flex: 1,
+    justifyContent: 'center',
   },
   contactInfo: {
-    flex: 1,
-
-    // flexDirection: 'row',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 5,
     margin: 5,
-    // alignItems: 'center',
-    // paddingTop: 16,
-    // paddingBottom: 16,
-    // paddingRight: 24,
-    // borderBottomColor: 'rgb(0, 0, 0)',
-    // borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgb(99, 9, 9)',
     borderWidth: 1,
     borderRadius: 10,
-    // backgroundColor: 'rgb(198, 125, 125)',
+    backgroundColor: 'rgb(255, 255, 255)',
   },
   title: {
     flex: 1,

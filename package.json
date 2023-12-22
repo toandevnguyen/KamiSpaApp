@@ -20,7 +20,6 @@
     "expo": "~49.0.15",
     "expo-file-system": "~15.4.5",
     "expo-image-picker": "~14.3.2",
-    "expo-status-bar": "~1.6.0",
     "expo-web-browser": "~12.3.2",
     "firebase": "^10.7.1",
     "react": "18.2.0",

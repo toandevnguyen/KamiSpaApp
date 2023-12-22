@@ -1,4 +1,3 @@
-
 import * as WebBrowser from 'expo-web-browser';
 import {
   signInWithEmailAndPassword,
@@ -10,31 +9,51 @@ import React from 'react';
 import { StyleSheet, Text, View, ImageBackground, TouchableOpacity } from 'react-native';
 import { Button, TextInput, HelperText, Avatar } from 'react-native-paper';
 
-import { FIRE_BASE_AUTH } from '../../firebase/firebaseConfig'; //getAuth
+import { firebase, FIRE_BASE_AUTH } from '../../firebase/firebaseConfig'; //getAuth
+import useAuth from '../../hooks/useAuth';
 WebBrowser.maybeCompleteAuthSession();
 export default function LoginScreen() {
+  const userLoginEmail = useAuth();
+
   //* SignInWithEmailAndPassword
   const [isFocusTxtInput, setIsFocusTxtInput] = React.useState(false);
-  const [button, setButton] = React.useState(false);
+  const [loadingButton, setLoadingButton] = React.useState(false);
   const [textUserName, setTextUserName] = React.useState('');
   const [textPassword, setTextPassword] = React.useState('');
 
   const handleSubmit = async () => {
     if (textUserName && textPassword) {
       try {
-        await signInWithEmailAndPassword(
+        const userCredential = await signInWithEmailAndPassword(
           FIRE_BASE_AUTH,
           textUserName,
           textPassword,
-          setButton(true),
+          setLoadingButton(true)
           // navigation.navigate("HomeScreen")
         );
-        // navigation.navigate("HomeScreen", {
-        //   emailcurrentUser: isUserLogin.user.email,
+
+        // // Lấy thông tin người dùng hiện tại
+        // const currentUser = userCredential?.user;
+        // const emailCurrentUser = currentUser?.email;
+        // const displayNameCurrentUser = currentUser?.displayName;
+        // const AvatarCurrentUser = currentUser?.photoURL;
+
+        // // Dữ liệu để lưu
+        // const userData = {
+        //   email: emailCurrentUser,
+        //   role: 'customer',
+        //   // displayName: displayNameCurrentUser,
+        //   // avatar: AvatarCurrentUser,
+        // };
+
+        // // Lưu thông tin người dùng vào Firestore
+        // await firebase.firestore().collection('KamiSpaApp-Users').doc(userData.email).set(userData).then(
+        //   // alert('Đã lưu thông tin '+`${emailCurrentUser}`+ 'vào FireStore')
+        //   );
 
         // });
       } catch (err) {
-        setButton(false);
+        setLoadingButton(false);
         alert('Tài khoản ' + textUserName + ' chưa được đăng ký hoặc nhập sai mật khẩu!');
 
         console.log('got error: ', err.message);
@@ -63,7 +82,7 @@ export default function LoginScreen() {
       .then(() => {
         // Password reset email sent!
         alert(
-          'Một liên kết đã gửi đến địa chỉ Email của bạn. Vui lòng kiểm tra Email để đặt lại mật khẩu!',
+          'Một liên kết đã gửi đến địa chỉ Email của bạn. Vui lòng kiểm tra Email để đặt lại mật khẩu!'
         );
       })
       .catch((error) => {
@@ -84,8 +103,8 @@ export default function LoginScreen() {
             !isFocusTxtInput
               ? 'rgb(0, 0, 0)'
               : hasErrorsEmail()
-                ? 'rgb(255, 43, 43)'
-                : 'rgb(61, 243, 25)'
+              ? 'rgb(255, 43, 43)'
+              : 'rgb(61, 243, 25)'
           }
           label="Email"
           textColor="rgb(0, 0, 0)"
@@ -99,9 +118,15 @@ export default function LoginScreen() {
           keyboardType="email-address"
         />
         {isFocusTxtInput ? (
-          <HelperText type="error" visible={hasErrorsEmail()}>
-            Nhập đúng định dạng địa chỉ Email!
-          </HelperText>
+          hasErrorsEmail() ? (
+            <HelperText type="error" visible={true}>
+              Sai định dạng Email!
+            </HelperText>
+          ) : (
+            <HelperText style={{ color: 'rgb(61, 243, 25)' }} type="error" visible={true}>
+              Thông tin hợp lệ.
+            </HelperText>
+          )
         ) : null}
         <TextInput
           style={styles.txtInput}
@@ -114,8 +139,8 @@ export default function LoginScreen() {
             !isFocusTxtInput
               ? 'rgb(0, 0, 0)'
               : hasErrorsPassword()
-                ? 'rgb(255, 43, 43)'
-                : 'rgb(61, 243, 25)'
+              ? 'rgb(255, 43, 43)'
+              : 'rgb(61, 243, 25)'
           }
           placeholder="*******"
           maxLength={8}
@@ -129,9 +154,15 @@ export default function LoginScreen() {
           onChangeText={(textPassword) => setTextPassword(textPassword)}
         />
         {isFocusTxtInput ? (
-          <HelperText type="error" visible={hasErrorsPassword()}>
-            Mật khẩu 8 ký tự!
-          </HelperText>
+          hasErrorsPassword() ? (
+            <HelperText type="error" visible={true}>
+              Mật khẩu phải ít nhất 8 ký tự!
+            </HelperText>
+          ) : (
+            <HelperText style={{ color: 'rgb(61, 243, 25)' }} type="error" visible={true}>
+              Đã đủ 8 ký tự.
+            </HelperText>
+          )
         ) : null}
       </View>
       <Button
@@ -139,8 +170,8 @@ export default function LoginScreen() {
         disabled={!!hasErrorsEmail()}
         mode="outlined"
         textColor="rgb(255, 255, 255)"
-        loading={button}
-        icon={button ? null : 'login'}
+        loading={loadingButton}
+        icon={loadingButton ? null : 'login'}
         onPress={handleSubmit}>
         Login
       </Button>
