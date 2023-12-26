@@ -106,7 +106,7 @@ export default function HomeScreen() {
       <Appbar style={{ width: '100%', backgroundColor: 'rgb(239, 80, 107)' }}>
         <Appbar.Content title={userProfile} color="rgb(255, 255, 255)" />
       </Appbar>
-      <Text style={styles.txtHeader}>KAMI SPA</Text>
+      <Text style={styles.txtHeader}>KAMI SPA Dev</Text>
       <View style={styles.groupTxtTitle}>
         <Text style={styles.txtTitle}>Danh sách dịch vụ</Text>
         <Icon.Button
