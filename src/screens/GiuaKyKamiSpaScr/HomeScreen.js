@@ -19,6 +19,7 @@ const second = today.getSeconds().toString().padStart(2, '0');
 
 export default function HomeScreen() {
   const userProfile = useAuth()?.user?.email;
+  console.log("🚀 ~ file: HomeScreen.js:22 ~ HomeScreen ~ userProfile:", userProfile)
 
   // const refUsers = firebase.firestore().collection('KamiSpaApp-Users').doc(userProfile); //create a reference to the collection, which can be used throughout our component to query it.
 
@@ -35,6 +36,7 @@ export default function HomeScreen() {
       return service.ServiceName.toLowerCase().includes(query.toLowerCase());
     });
     setSearchResults(results);
+    
   };
 
 
